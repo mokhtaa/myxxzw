@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>مصروفاتي</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  :root{
+    --ink:#1c2b2a;
+    --paper:#f6f2e9;
+    --paper-2:#efe8d8;
+    --teal:#1f4d47;
+    --teal-deep:#123230;
+    --gold:#b8863b;
+    --red:#a4392f;
+    --line: rgba(28,43,42,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Tajawal',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    padding-bottom:100px;
+  }
+  .receipt-head{
+    background:var(--teal-deep);
+    color:var(--paper);
+    padding:28px 20px 22px;
+    position:relative;
+    overflow:hidden;
+  }
+  .receipt-head::after{
+    content:"";
+    position:absolute;
+    bottom:-1px;left:0;right:0;
+    height:14px;
+    background:
+      linear-gradient(135deg, var(--teal-deep) 50%, transparent 50%) 0 0/14px 14px repeat-x,
+      linear-gradient(-135deg, var(--teal-deep) 50%, transparent 50%) 0 0/14px 14px repeat-x;
+    background-color:var(--paper);
+  }
+  .brand{
+    font-size:13px;
+    letter-spacing:3px;
+    opacity:0.65;
+    font-weight:500;
+  }
+  .month-label{
+    font-size:20px;
+    font-weight:700;
+    margin-top:4px;
+  }
+  .total-row{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    margin-top:18px;
+  }
+  .total-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:42px;
+    font-weight:600;
+    letter-spacing:-1px;
+  }
+  .total-cur{
+    font-size:15px;
+    opacity:0.75;
+  }
+  .sub-stats{
+    display:flex;
+    gap:18px;
+    margin-top:14px;
+    font-size:12.5px;
+    opacity:0.7;
+  }
+
+  .content{
+    padding:18px 16px 0;
+  }
+
+  .add-card{
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:20px;
+  }
+  .add-card .row{
+    display:flex;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .add-card input, .add-card select{
+    font-family:'Tajawal',sans-serif;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:10px;
+    padding:12px 12px;
+    font-size:15px;
+    color:var(--ink);
+    width:100%;
+    outline:none;
+  }
+  .add-card input:focus, .add-card select:focus{
+    border-color:var(--teal);
+  }
+  #amount{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:18px;
+    max-width:140px;
+  }
+  .cat-select{
+    max-width:150px;
+  }
+  #reason{
+    flex:1;
+  }
+  .add-btn{
+    width:100%;
+    background:var(--teal);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:13px;
+    font-family:'Tajawal',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .add-btn:active{ background:var(--teal-deep); }
+
+  .day-group{
+    margin-bottom:6px;
+  }
+  .day-header{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    color:var(--ink);
+    opacity:0.55;
+    padding:10px 4px 6px;
+    border-bottom:1px dashed var(--line);
+    margin-bottom:4px;
+  }
+  .entry{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    margin-bottom:8px;
+  }
+  .entry-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    overflow:hidden;
+  }
+  .cat-dot{
+    width:9px;height:9px;border-radius:50%;
+    flex-shrink:0;
+  }
+  .entry-reason{
+    font-size:15px;
+    font-weight:500;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .entry-cat{
+    font-size:11.5px;
+    opacity:0.55;
+    margin-top:1px;
+  }
+  .entry-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-shrink:0;
+  }
+  .entry-amount{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:16px;
+    color:var(--red);
+  }
+  .del-btn{
+    background:none;
+    border:none;
+    color:var(--ink);
+    opacity:0.35;
+    font-size:18px;
+    cursor:pointer;
+    padding:2px 4px;
+    line-height:1;
+  }
+  .del-btn:active{ opacity:0.8; }
+
+  .empty{
+    text-align:center;
+    padding:40px 20px;
+    opacity:0.5;
+    font-size:14px;
+    line-height:1.9;
+  }
+
+  .toast{
+    position:fixed;
+    bottom:22px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--teal-deep);
+    color:var(--paper);
+    padding:10px 20px;
+    border-radius:20px;
+    font-size:13.5px;
+    opacity:0;
+    transition:all .25s;
+    pointer-events:none;
+    white-space:nowrap;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  .month-nav{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    position:absolute;
+    top:28px;
+    left:20px;
+  }
+  .month-nav button{
+    background:rgba(255,255,255,0.12);
+    border:none;
+    color:var(--paper);
+    width:30px;height:30px;
+    border-radius:50%;
+    font-size:16px;
+    cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="receipt-head">
+  <div class="month-nav">
+    <button onclick="shiftMonth(1)">‹</button>
+    <button onclick="shiftMonth(-1)">›</button>
+  </div>
+  <div class="brand">دفتر مصروفاتي</div>
+  <div class="month-label" id="monthLabel">–</div>
+  <div class="total-row">
+    <span class="total-num" id="totalNum">0</span>
+    <span class="total-cur">جنيه</span>
+  </div>
+  <div class="sub-stats">
+    <span id="countStat">0 عملية</span>
+    <span id="avgStat">—</span>
+  </div>
+</div>
+
+<div class="content">
+  <div class="add-card">
+    <div class="row">
+      <input id="amount" type="number" inputmode="decimal" placeholder="المبلغ" />
+      <select id="category" class="cat-select">
+        <option value="أكل">🍽️ أكل</option>
+        <option value="مواصلات">🚕 مواصلات</option>
+        <option value="فواتير">💡 فواتير</option>
+        <option value="تسوق">🛍️ تسوق</option>
+        <option value="صحة">💊 صحة</option>
+        <option value="ترفيه">🎬 ترفيه</option>
+        <option value="أخرى">📌 أخرى</option>
+      </select>
+    </div>
+    <div class="row">
+      <input id="reason" type="text" placeholder="السبب — مثلاً: عشاء مع الأصحاب" />
+    </div>
+    <button class="add-btn" onclick="addExpense()">إضافة المصروف</button>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let viewDate = new Date();
+let expenses = [];
+const catColors = {
+  "أكل":"#b8863b","مواصلات":"#1f4d47","فواتير":"#a4392f",
+  "تسوق":"#7a4f9c","صحة":"#2f7a5c","ترفيه":"#c2632a","أخرى":"#5a5a5a"
+};
+
+function monthKey(d){ return `${d.getFullYear()}-${d.getMonth()}`; }
+function storageKey(d){ return `expenses:${monthKey(d)}`; }
+
+function loadMonth(){
+  try{
+    const raw = localStorage.getItem(storageKey(viewDate));
+    expenses = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    expenses = [];
+  }
+  render();
+}
+
+function saveMonth(){
+  try{
+    localStorage.setItem(storageKey(viewDate), JSON.stringify(expenses));
+  }catch(e){
+    showToast('تعذر الحفظ، حاول مرة أخرى');
+  }
+}
+
+function shiftMonth(delta){
+  viewDate.setMonth(viewDate.getMonth()+delta);
+  loadMonth();
+}
+
+function addExpense(){
+  const amountEl = document.getElementById('amount');
+  const reasonEl = document.getElementById('reason');
+  const catEl = document.getElementById('category');
+  const amount = parseFloat(amountEl.value);
+  const reason = reasonEl.value.trim();
+
+  if(!amount || amount <= 0){
+    showToast('اكتب مبلغ صحيح الأول');
+    amountEl.focus();
+    return;
+  }
+  if(!reason){
+    showToast('اكتب السبب كمان');
+    reasonEl.focus();
+    return;
+  }
+
+  const now = new Date();
+  expenses.unshift({
+    id: Date.now().toString(),
+    amount, reason, category: catEl.value,
+    date: now.toISOString()
+  });
+
+  amountEl.value = '';
+  reasonEl.value = '';
+  saveMonth();
+  render();
+  showToast('تم إضافة المصروف ✓');
+}
+
+function deleteExpense(id){
+  expenses = expenses.filter(e => e.id !== id);
+  saveMonth();
+  render();
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+function fmt(n){
+  return n.toLocaleString('ar-EG', {maximumFractionDigits:2});
+}
+
+function render(){
+  const monthNames = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  document.getElementById('monthLabel').textContent = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+
+  const total = expenses.reduce((s,e)=>s+e.amount,0);
+  document.getElementById('totalNum').textContent = fmt(total);
+  document.getElementById('countStat').textContent = `${expenses.length} عملية`;
+  document.getElementById('avgStat').textContent = expenses.length ? `متوسط ${fmt(total/expenses.length)}` : '—';
+
+  const list = document.getElementById('list');
+  if(expenses.length === 0){
+    list.innerHTML = '<div class="empty">لسه مفيش مصروفات الشهر ده<br>ابدأ بإضافة أول عملية 👆</div>';
+    return;
+  }
+
+  const groups = {};
+  expenses.forEach(e=>{
+    const d = new Date(e.date);
+    const key = d.toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long'});
+    if(!groups[key]) groups[key] = [];
+    groups[key].push(e);
+  });
+
+  list.innerHTML = Object.entries(groups).map(([day, items])=>{
+    const dayTotal = items.reduce((s,e)=>s+e.amount,0);
+    return `
+      <div class="day-group">
+        <div class="day-header"><span>${day}</span><span>${fmt(dayTotal)} جنيه</span></div>
+        ${items.map(e=>`
+          <div class="entry">
+            <div class="entry-left">
+              <span class="cat-dot" style="background:${catColors[e.category]||'#999'}"></span>
+              <div>
+                <div class="entry-reason">${escapeHtml(e.reason)}</div>
+                <div class="entry-cat">${e.category}</div>
+              </div>
+            </div>
+            <div class="entry-right">
+              <span class="entry-amount">${fmt(e.amount)}</span>
+              <button class="del-btn" onclick="deleteExpense('${e.id}')">✕</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+loadMonth();
+</script>
+</body>
+</html>
